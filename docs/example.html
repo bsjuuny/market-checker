@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국장 방향 체크리스트 & 포트폴리오</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent-green: #00e5a0;
+    --accent-red: #ff4d6d;
+    --accent-yellow: #ffd166;
+    --accent-blue: #38bdf8;
+    --accent-purple: #a78bfa;
+    --accent-orange: #fb923c;
+    --text-primary: #f0f4ff;
+    --text-secondary: #8899bb;
+    --text-dim: #4a5a7a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(0,229,160,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 30% at 80% 80%, rgba(56,189,248,0.04) 0%, transparent 50%);
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .header-badge {
+    display: inline-block;
+    background: rgba(0,229,160,0.1);
+    border: 1px solid rgba(0,229,160,0.3);
+    color: var(--accent-green);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  h1 {
+    font-size: clamp(20px, 4vw, 30px);
+    font-weight: 900;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+  }
+
+  h1 span { color: var(--accent-green); }
+
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  /* ── MARKET SNAPSHOT ── */
+  .snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .snap-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .snap-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .snap-card.up::before { background: var(--accent-green); }
+  .snap-card.down::before { background: var(--accent-red); }
+  .snap-card.neutral::before { background: var(--accent-yellow); }
+
+  .snap-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 6px;
+  }
+
+  .snap-value {
+    font-size: clamp(15px, 3vw, 20px);
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+  }
+
+  .snap-value.up { color: var(--accent-green); }
+  .snap-value.down { color: var(--accent-red); }
+  .snap-value.neutral { color: var(--accent-yellow); }
+
+  .snap-change {
+    font-size: 11px;
+    margin-top: 4px;
+    color: var(--text-secondary);
+  }
+
+  /* ── SECTION TITLES ── */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist-section { 
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .check-group {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .check-group-header {
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .icon { font-size: 16px; }
+
+  .check-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 11px 16px;
+    border-bottom: 1px solid rgba(30,45,69,0.5);
+    gap: 12px;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+
+  .check-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .check-desc strong {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+
+  .check-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-green { background: rgba(0,229,160,0.15); color: var(--accent-green); }
+  .tag-red { background: rgba(255,77,109,0.15); color: var(--accent-red); }
+  .tag-yellow { background: rgba(255,209,102,0.15); color: var(--accent-yellow); }
+  .tag-blue { background: rgba(56,189,248,0.15); color: var(--accent-blue); }
+  .tag-purple { background: rgba(167,139,250,0.15); color: var(--accent-purple); }
+  .tag-orange { background: rgba(251,146,60,0.15); color: var(--accent-orange); }
+
+  /* ── DIRECTION VERDICT ── */
+  .verdict-section {
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .verdict-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .verdict-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+  }
+
+  .verdict-scenario {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .verdict-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .verdict-detail {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .verdict-signal {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 0;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .signal-strong-buy { background: rgba(0,229,160,0.15); color: var(--accent-green); }
+  .signal-neutral { background: rgba(255,209,102,0.12); color: var(--accent-yellow); }
+  .signal-caution { background: rgba(255,77,109,0.12); color: var(--accent-red); }
+
+  /* ── PORTFOLIO ── */
+  .portfolio-section {
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+
+  .portfolio-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .ptab {
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+
+  .ptab.active {
+    background: rgba(0,229,160,0.15);
+    border-color: rgba(0,229,160,0.4);
+    color: var(--accent-green);
+  }
+
+  .portfolio-panel { display: none; }
+  .portfolio-panel.active { display: block; }
+
+  .alloc-bar-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 16px;
+    margin-bottom: 10px;
+  }
+
+  .alloc-row {
+    margin-bottom: 14px;
+  }
+
+  .alloc-row:last-child { margin-bottom: 0; }
+
+  .alloc-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 7px;
+  }
+
+  .alloc-name {
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .alloc-pct {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-green);
+  }
+
+  .bar-track {
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .alloc-tickers {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* sector colors */
+  .c1 { background: linear-gradient(90deg, #00e5a0, #00b37a); }
+  .c2 { background: linear-gradient(90deg, #38bdf8, #0ea5e9); }
+  .c3 { background: linear-gradient(90deg, #a78bfa, #7c3aed); }
+  .c4 { background: linear-gradient(90deg, #ffd166, #f59e0b); }
+  .c5 { background: linear-gradient(90deg, #fb923c, #ea580c); }
+  .c6 { background: linear-gradient(90deg, #ff4d6d, #e11d48); }
+  .c7 { background: linear-gradient(90deg, #34d399, #059669); }
+
+  /* ── TIPS ── */
+  .tips-section {
+    margin-top: 28px;
+    animation: fadeUp 0.6s 0.5s ease both;
+  }
+
+  .tip-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid;
+    border-radius: 10px;
+    padding: 13px 15px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .tip-card strong { color: var(--text-primary); }
+  .tip-card.g { border-left-color: var(--accent-green); }
+  .tip-card.r { border-left-color: var(--accent-red); }
+  .tip-card.y { border-left-color: var(--accent-yellow); }
+  .tip-card.b { border-left-color: var(--accent-blue); }
+
+  .disclaimer {
+    margin-top: 32px;
+    padding: 14px 16px;
+    background: rgba(255,77,109,0.06);
+    border: 1px solid rgba(255,77,109,0.2);
+    border-radius: 10px;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .dot-live {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent-green);
+    display: inline-block;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">🚨 2026.03.09 MON 23:00 — 3/10(화) 국장 긴급 대비</div>
+  <h1>나스닥·환율·야간선물로 보는<br><span>국장 방향 체크리스트</span></h1>
+  <p class="subtitle">개장 전 5분 루틴 + 섹터별 비중 조절 전략</p>
+</div>
+
+<!-- MARKET SNAPSHOT -->
+<div class="snapshot-grid">
+  <div class="snap-card down">
+    <div class="snap-label">NASDAQ (3/7 마감)</div>
+    <div class="snap-value down">22,388</div>
+    <div class="snap-change">▼ -1.6% · NQ선물 현재 하락 중</div>
+  </div>
+  <div class="snap-card down">
+    <div class="snap-label">USD/KRW (3/9 마감)</div>
+    <div class="snap-value down">1,495</div>
+    <div class="snap-change">⚠️ 장중 1,506원 터치 · 금융위기 수준</div>
+  </div>
+  <div class="snap-card down">
+    <div class="snap-label">NQ 야간선물 (현재)</div>
+    <div class="snap-value down">24,394</div>
+    <div class="snap-change">▼ -1.5% · 적극 매도 신호</div>
+  </div>
+</div>
+<div class="snapshot-grid" style="margin-top:-18px;">
+  <div class="snap-card down">
+    <div class="snap-label">코스피 (3/9 마감)</div>
+    <div class="snap-value down">5,252</div>
+    <div class="snap-change">▼ -5.96% · 서킷브레이커 발동</div>
+  </div>
+  <div class="snap-card down">
+    <div class="snap-label">코스닥 (3/9 마감)</div>
+    <div class="snap-value down">1,102</div>
+    <div class="snap-change">▼ -4.54% · 매도사이드카 발동</div>
+  </div>
+  <div class="snap-card down">
+    <div class="snap-label">WTI 유가 (3/9)</div>
+    <div class="snap-value down">$107</div>
+    <div class="snap-change">🔥 +14.8% · 장중 $111 터치</div>
+  </div>
+</div>
+
+<!-- CHECKLIST -->
+<div class="checklist-section">
+  <div class="section-title">⚡ STEP 1 — 나스닥 확인</div>
+  <div class="check-group">
+    <div class="check-group-header">
+      <span class="icon">🇺🇸</span> 나스닥 / 나스닥 야간선물
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>+1% 이상 상승</strong> → 코스피·코스닥 동반 상승 기대, 반도체·IT 비중 확대 신호</div>
+      <span class="check-tag tag-green">강세</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>-1% ~ +1%</strong> → 보합 예상. 개별 모멘텀 종목 중심 대응, 지수 추종 자제</div>
+      <span class="check-tag tag-yellow">보합</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>-1% 이상 하락</strong> → 위험자산 회피 심리. 방어주·현금 비중 높이기, 추격 매수 금지</div>
+      <span class="check-tag tag-red">약세</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>현재 상황</strong>: NQ선물 24,394pt(-1.5%) 하락 중. 미국 주식 선물 S&P500 -1.3%, 나스닥100 -1.5%. WTI $107 고공행진에 연준 금리인하 기대 완전 소멸. 내일 미장도 추가 하락 가능성 높음</div>
+      <span class="check-tag tag-red">🚨 경고</span>
+    </div>
+  </div>
+
+  <div class="section-title">💱 STEP 2 — 원달러 환율 확인</div>
+  <div class="check-group">
+    <div class="check-group-header">
+      <span class="icon">💵</span> 원/달러 환율 (기준: 전일 대비 방향)
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>환율 하락 (원화 강세)</strong> → 외국인 유입 기대. 코스피 대형주·수입주 유리, 수출주 소폭 불리</div>
+      <span class="check-tag tag-green">매수 우호</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>환율 상승 (원화 약세)</strong> → 외국인 이탈 가능성. 반도체 등 달러 수출주는 수혜, 내수주 불리</div>
+      <span class="check-tag tag-orange">혼조</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>1,500원 이상 급등</strong> → 비상 상황. 전량 관망 또는 방어 자산(금·달러 ETF)으로 대피</div>
+      <span class="check-tag tag-red">위기</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>현재 상황</strong>: 3/9 마감 1,495원(+19.1원). 장중 1,506원 터치 — 2009년 금융위기 이후 최고치. 한은 "과도한 변동성 안정화 조치 실시" 긴급 개입. 외국인 코스피 3조263억원 + 기관 1조5384억원 순매도 충격</div>
+      <span class="check-tag tag-red">🚨 금융위기 수준</span>
+    </div>
+  </div>
+
+  <div class="section-title">🌙 STEP 3 — 야간선물 확인</div>
+  <div class="check-group">
+    <div class="check-group-header">
+      <span class="icon">📈</span> 코스피200 야간선물 (전일 정규장 종가 대비)
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>+0.5% 이상</strong> → 강세 갭업 개장 예상. 장 초반 매도 유혹 조심, 추세 따라가기</div>
+      <span class="check-tag tag-green">갭업</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>-0.5% ~ +0.5%</strong> → 보합 개장. 오전 10시 전후 방향성 확인 후 대응</div>
+      <span class="check-tag tag-blue">관망</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>-0.5% 이하</strong> → 갭다운 개장 가능. 손절 라인 재점검, 신규 매수 자제</div>
+      <span class="check-tag tag-red">갭다운</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>체크 포인트</strong>: 코스피200 야간선물 내일 오전 6~9시 마감값 필수 확인. NQ선물 23,000선 붕괴 여부가 핵심. 코스피 3/9 마감 5,252pt — 3/4 저점(5,094pt) 재테스트 가능성 높음. 코스닥 액티브 ETF 오늘(3/10) 상장 — 수급 방어선 역할 기대</div>
+      <span class="check-tag tag-purple">🔑 핵심 체크</span>
+    </div>
+  </div>
+
+  <div class="section-title">🛢️ STEP 4 — 지정학 변수</div>
+  <div class="check-group">
+    <div class="check-group-header">
+      <span class="icon">🌍</span> 중동 이란·호르무즈 & 유가 체크
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>WTI $95 이하 급락</strong> → 유가 안정 신호. 항공·운송·소비주 반등 기대. 반도체 낙폭 과대 매수 기회 탐색</div>
+      <span class="check-tag tag-green">안정 전환</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>WTI $100~110 사이 (현재 구간)</strong> → 정유·방산 수혜 지속. 코스피 5,000~5,300 박스권 하단 다지기 예상. 반도체·바이오 추가 하락 압박</div>
+      <span class="check-tag tag-orange">⚠️ 지금 여기</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>WTI $120 이상 추가 폭등</strong> → 스태그플레이션 공포 극대화. 코스피 4,500선 붕괴 가능. 현금·금·달러 ETF 외 전량 정리 고려</div>
+      <span class="check-tag tag-red">극단 위기</span>
+    </div>
+    <div class="check-item">
+      <div class="check-desc"><strong>현재 상황</strong>: WTI 장중 $111.24 터치(2022년 7월 이후 최고). 이란 호르무즈 군사 봉쇄 지속. 이재명 대통령 오전 청와대 '중동 상황 비상경제점검회의' 긴급 소집. 최고가격제 도입 절차 신속 진행 예고. 코스피 VKOSPI 공포지수 71.82(+14.5%) 급등</div>
+      <span class="check-tag tag-red">🔥 전쟁 10일째</span>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTION VERDICT -->
+<div class="verdict-section">
+  <div class="section-title">🎯 3/10(화) 시나리오별 국장 방향</div>
+  <div class="verdict-grid">
+    <div class="verdict-card">
+      <div class="verdict-scenario">BULL CASE — 10%</div>
+      <div class="verdict-title">🟢 기술적 반등</div>
+      <div class="verdict-detail">WTI $100 이하 급락 + 이란 협상 가능성 보도 + 코스닥 ETF 상장 수급. 코스피 5,400 단기 회복 시도</div>
+      <div class="verdict-signal signal-strong-buy">방산→저가 반도체 순환</div>
+    </div>
+    <div class="verdict-card">
+      <div class="verdict-scenario">BASE CASE — 30%</div>
+      <div class="verdict-title">🟡 5,000~5,300 박스</div>
+      <div class="verdict-detail">유가 $100~110 유지. 개인 4조 반발매수 vs 외국인 매도 대치. 코스닥 ETF 상장 수급이 낙폭 제한. 하단 다지기</div>
+      <div class="verdict-signal signal-neutral">관망 / 소량 분할</div>
+    </div>
+    <div class="verdict-card">
+      <div class="verdict-scenario">BEAR CASE — 60%</div>
+      <div class="verdict-title">🔴 3/4 저점 재테스트</div>
+      <div class="verdict-detail">NQ선물 추가 하락 + WTI $115↑ + 환율 1,500원 재돌파 → 코스피 5,094(3/4 저점) 혹은 4,900선 붕괴 위험</div>
+      <div class="verdict-signal signal-caution">현금 60% 이상 필수</div>
+    </div>
+  </div>
+</div>
+
+<!-- PORTFOLIO -->
+<div class="portfolio-section">
+  <div class="section-title">💼 섹터별 예시 포트폴리오</div>
+  <div class="portfolio-tabs">
+    <div class="ptab active" onclick="switchTab('bull')">🟢 강세장</div>
+    <div class="ptab" onclick="switchTab('base')">🟡 보합장</div>
+    <div class="ptab" onclick="switchTab('bear')">🔴 약세장</div>
+  </div>
+
+  <!-- BULL -->
+  <div class="portfolio-panel active" id="panel-bull">
+    <div class="alloc-bar-wrapper">
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🖥️</span> 반도체 (코스피)</div>
+          <div class="alloc-pct">30%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c1" style="width:30%"></div></div>
+        <div class="alloc-tickers">삼성전자 · SK하이닉스 · 한미반도체</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>⚙️</span> 반도체 소부장 (코스닥)</div>
+          <div class="alloc-pct">20%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c2" style="width:20%"></div></div>
+        <div class="alloc-tickers">이오테크닉스 · 에스앤에스텍 · 원익IPS</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🛡️</span> 방산 (코스피)</div>
+          <div class="alloc-pct">20%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c4" style="width:20%"></div></div>
+        <div class="alloc-tickers">한화에어로스페이스 · 현대로템 · LIG넥스원</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🧬</span> 바이오 (코스닥)</div>
+          <div class="alloc-pct">15%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c3" style="width:15%"></div></div>
+        <div class="alloc-tickers">셀트리온 · 알테오젠 · 리가켐바이오</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🚢</span> 조선 (코스피)</div>
+          <div class="alloc-pct">10%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c5" style="width:10%"></div></div>
+        <div class="alloc-tickers">HD현대중공업 · 한화오션 · HD한국조선해양</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>💰</span> 현금·ETF</div>
+          <div class="alloc-pct">5%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c7" style="width:5%"></div></div>
+        <div class="alloc-tickers">KODEX 200 / 현금 대기</div>
+      </div>
+    </div>
+    <div class="tip-card g">
+      <span>💡</span>
+      <div><strong>강세장 전략 [3/10 — 조건부 10%]:</strong> Bull Case 진입 조건 — <span style="color:var(--accent-green)">WTI $100 이하 확인 + 나스닥선물 +0.5% 이상</span> 동시 충족 시에만. 낙폭과대 반도체(SK하이닉스·삼성전자) 분할 매수 시작. 코스닥 ETF 상장일 수급 확인 필수.</div>
+    </div>
+  </div>
+
+  <!-- BASE -->
+  <div class="portfolio-panel" id="panel-base">
+    <div class="alloc-bar-wrapper">
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🛡️</span> 방산 (코스피) ⭐핵심</div>
+          <div class="alloc-pct">30%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c4" style="width:30%"></div></div>
+        <div class="alloc-tickers">한화에어로스페이스 · LIG넥스원 · 현대로템 · 한화시스템</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🛢️</span> 정유·에너지 (코스피) ⭐핵심</div>
+          <div class="alloc-pct">20%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c6" style="width:20%"></div></div>
+        <div class="alloc-tickers">S-Oil · SK이노베이션 · 에쓰오일 · GS에너지</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🥇</span> 금·달러 ETF (인플레 헤지)</div>
+          <div class="alloc-pct">20%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c5" style="width:20%"></div></div>
+        <div class="alloc-tickers">KODEX 골드선물 · ACE KRX금현물 · TIGER 미국달러선물</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🖥️</span> 반도체 (소량 유지)</div>
+          <div class="alloc-pct">10%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c1" style="width:10%"></div></div>
+        <div class="alloc-tickers">SK하이닉스만 소량 (HBM4 펀더멘털 유지)</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>💰</span> 현금·단기채</div>
+          <div class="alloc-pct">20%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c7" style="width:20%"></div></div>
+        <div class="alloc-tickers">KODEX KOFR금리액티브 · CMA · 재진입 대기</div>
+      </div>
+    </div>
+    <div class="tip-card y">
+      <span>💡</span>
+      <div><strong>보합장 전략 [3/10 최신]:</strong> 유가 $107 현실에서 <span style="color:var(--accent-yellow)">방산·정유가 유일한 수익 섹터</span>. 금 ETF 20%로 스태그플레이션 헤지 강화. 반도체는 SK하이닉스 소량만 — WTI $95 이하로 내려올 때까지 확대 자제. 코스닥 ETF 상장(3/10) 수급 확인 후 바이오 재편입 검토.</div>
+    </div>
+  </div>
+
+  <!-- BEAR -->
+  <div class="portfolio-panel" id="panel-bear">
+    <div class="alloc-bar-wrapper">
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>💰</span> 현금·단기채</div>
+          <div class="alloc-pct">40%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c7" style="width:40%"></div></div>
+        <div class="alloc-tickers">KODEX KOFR금리액티브 · CMA · MMF</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🥇</span> 금·달러 (방어자산)</div>
+          <div class="alloc-pct">20%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c4" style="width:20%"></div></div>
+        <div class="alloc-tickers">KODEX 골드선물 · TIGER 미국달러선물</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🛡️</span> 방산 (지정학 수혜)</div>
+          <div class="alloc-pct">20%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c5" style="width:20%"></div></div>
+        <div class="alloc-tickers">한화에어로스페이스 · LIG넥스원 · 현대로템</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🛢️</span> 정유·에너지</div>
+          <div class="alloc-pct">15%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c6" style="width:15%"></div></div>
+        <div class="alloc-tickers">S-Oil · SK이노베이션 · 에쓰오일</div>
+      </div>
+      <div class="alloc-row">
+        <div class="alloc-meta">
+          <div class="alloc-name"><span>🖥️</span> 반도체 핵심만 유지</div>
+          <div class="alloc-pct">5%</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill c1" style="width:5%"></div></div>
+        <div class="alloc-tickers">SK하이닉스만 소량 유지 (실적 펀더멘털)</div>
+      </div>
+    </div>
+    <div class="tip-card r">
+      <span>⚠️</span>
+      <div><strong>약세장 전략 [3/10 — Bear Case 60%]:</strong> 현금 40% + 금·달러 ETF 20% = <span style="color:var(--accent-red)">방어자산 60%</span>가 기본. WTI $115 돌파 시 방산·정유만 남기고 전량 현금화. 코스피 5,094(3/4 저점) 이탈 확인 시 추가 손절 금지 — 반등 시 분할 매수 대기로 전환.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TIPS -->
+<div class="tips-section">
+  <div class="section-title">📋 3/10(화) 개장 전 5분 루틴</div>
+  <div class="tip-card g">
+    <span>⏰</span>
+    <div><strong>오전 6:00~8:30</strong> — 코스피200 야간선물 마감값 (5,094pt 이탈 여부) → NQ선물 23,000선 붕괴 여부 → WTI 유가 $110 이상 유지 or 하락 전환 확인 → 이란 협상 관련 새벽 뉴스 검색</div>
+  </div>
+  <div class="tip-card b">
+    <span>⏰</span>
+    <div><strong>오전 9:00</strong> — 코스닥 액티브 ETF 상장 첫날 수급 확인 (상장가 갭 방향) → 외국인 동시호가 순매수/매도 → 방산주 시초가 확인 (한화에어로스페이스 기준)</div>
+  </div>
+  <div class="tip-card y">
+    <span>⏰</span>
+    <div><strong>오전 10:00~10:30</strong> — 서킷브레이커 발동 기준선(전일 대비 -8%) 실시간 확인. 코스피 <strong>4,831pt(-8%) 이하</strong> 접근 시 즉시 현금화 준비. 개인 반발매수 vs 외국인 매도 방향 확인</div>
+  </div>
+  <div class="tip-card r">
+    <span>🚨</span>
+    <div><strong>3/10 긴급 탈출 신호 (3가지 동시)</strong> — ① 코스피 -5% 이상 ② 환율 1,500원 재돌파 ③ WTI $115 이상 — 3가지 동시 발생 시 <strong>즉시 전량 현금화</strong>. 방산·정유·금 ETF만 잔류</div>
+  </div>
+</div>
+
+<div class="disclaimer">
+  ⚠️ 본 자료는 투자 참고용이며, 투자 권유가 아닙니다.<br>
+  모든 투자 판단과 책임은 본인에게 있습니다. 시장 상황은 실시간으로 변동되므로 반드시 최신 데이터를 직접 확인하세요.
+</div>
+
+<script>
+function switchTab(type) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.portfolio-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + type).classList.add('active');
+
+  // animate bars
+  setTimeout(() => {
+    document.querySelectorAll('#panel-' + type + ' .bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => bar.style.width = w, 50);
+    });
+  }, 10);
+}
+
+// Initial bar animation
+window.addEventListener('load', () => {
+  document.querySelectorAll('#panel-bull .bar-fill').forEach(bar => {
+    const w = bar.style.width;
+    bar.style.width = '0%';
+    setTimeout(() => bar.style.width = w, 300);
+  });
+});
+</script>
+</body>
+</html>
