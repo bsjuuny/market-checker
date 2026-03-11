@@ -121,11 +121,16 @@
         }
 
         #donation-popup.active { display: block; }
-        .popup-title { font-size: 16px; font-weight: 900; color: var(--accent-green); margin-bottom: 8px; }
-        .popup-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px; }
-        .popup-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-donate { background: var(--accent-green); color: var(--bg); border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; }
-        .btn-close { background: rgba(255,255,255,0.05); color: var(--text-secondary); border: 1px solid var(--border); padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .popup-title { font-size: 16px; font-weight: 900; color: var(--accent-green); margin-bottom: 8px; text-align: center; }
+        .popup-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px; text-align: center; }
+        .popup-qr { width: 100%; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); }
+        .popup-btns { display: block; }
+        .btn-close { width: 100%; background: rgba(255,255,255,0.05); color: var(--text-secondary); border: 1px solid var(--border); padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+        .warning-banner { background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3); border-radius: 12px; padding: 16px; margin-bottom: 30px; display: flex; gap: 12px; align-items: center; animation: fadeDown 0.6s ease both; }
+        .warning-icon { font-size: 24px; }
+        .warning-content { font-size: 12px; color: #ff99aa; line-height: 1.6; }
+        .warning-content strong { color: var(--accent-red); font-weight: 900; display: block; margin-bottom: 2px; font-size: 14px; }
 
         @keyframes slideIn { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
@@ -136,8 +141,15 @@
     </style>
 </head>
 <body>
+    <div class="warning-banner">
+        <div class="warning-icon">⚠️</div>
+        <div class="warning-content">
+            <strong>핵심 투자 주의 사항</strong>
+            본 자료는 기술적 지표에 기반한 자동 분석 결과일 뿐, 어떠한 경우에도 투자 결과에 대한 책임을 지지 않습니다. 시장의 변동성은 예측 불가능하므로 반드시 본인의 책임 하에 신중히 결정하시기 바랍니다.
+        </div>
+    </div>
     <div class="header">
-        <div class="header-badge"><span class="dot-live"></span> 2026. 3. 12. AM 1:23:45 기준 업데이트 완료</div>
+        <div class="header-badge"><span class="dot-live"></span> 2026. 3. 12. AM 1:29:47 기준 업데이트 완료</div>
         <h1>국외 전산 지표 기반<br><span>국장 방향 체크리스트</span></h1>
         <p class="subtitle">나스닥·환율·야간선물 통합 분석 대시보드</p>
     </div>
@@ -145,17 +157,17 @@
     <div class="snapshot-grid">
         <div class="snap-card down">
             <div class="snap-label">NASDAQ (현지)</div>
-            <div class="snap-value down">22631.35</div>
-            <div class="snap-change">-0.29%</div>
+            <div class="snap-value down">22640.27</div>
+            <div class="snap-change">-0.25%</div>
         </div>
         <div class="snap-card down">
             <div class="snap-label">USD/KRW</div>
-            <div class="snap-value">1477.40</div>
+            <div class="snap-value">1477.80</div>
             <div class="snap-change">실시간 환율</div>
         </div>
         <div class="snap-card down">
             <div class="snap-label">NQ 야간선물</div>
-            <div class="snap-value down">-0.28%</div>
+            <div class="snap-value down">-0.22%</div>
             <div class="snap-change">현재 하락/상승폭</div>
         </div>
     </div>
@@ -194,7 +206,7 @@
         </div>
         <div class="check-item">
             <div class="check-desc"><strong>NQ 야간선물</strong> — 한국 시장 개장 직전 미 선물 흐름</div>
-            <span class="check-tag tag-red">-0.28%</span>
+            <span class="check-tag tag-red">-0.22%</span>
         </div>
     </div>
 
@@ -266,10 +278,10 @@
 
     <div id="donation-popup">
         <div class="popup-title">☕ 개발자에게 커피 한 잔</div>
-        <div class="popup-text">이 대시보드가 도움이 되셨나요?<br>더 나은 분석 서비스를 위해 응원해주세요!</div>
+        <div class="popup-text">이 대시보드가 도움이 되셨나요?<br>QR코드를 스캔하여 응원해주세요!</div>
+        <img src="../public/donation-qr.png" alt="Donation QR" class="popup-qr">
         <div class="popup-btns">
-            <a href="https://toss.me/bsjuun" target="_blank" class="btn-donate">기부하기</a>
-            <button class="btn-close" onclick="closePopup()">다음에</button>
+            <button class="btn-close" onclick="closePopup()">다음에 할게요</button>
         </div>
     </div>
 
