@@ -65,7 +65,7 @@
     <div class="container">
         <header>
             <h1>국장 방향 체크리스트</h1>
-            <p>마지막 업데이트: 2026. 3. 12. AM 12:55:31</p>
+            <p>마지막 업데이트: 2026. 3. 12. AM 1:00:27</p>
         </header>
 
         <div class="grid-snap">
@@ -81,23 +81,23 @@
             </div>
             <div class="snap-card down">
                 <h3>NASDAQ</h3>
-                <div class="price">22668.73</div>
-                <div class="rate">-0.12%</div>
+                <div class="price">22647.46</div>
+                <div class="rate">-0.22%</div>
             </div>
             <div class="snap-card">
                 <h3>USD/KRW</h3>
-                <div class="price">1475.30</div>
+                <div class="price">1476.20</div>
             </div>
         </div>
 
         <div class="checker-section">
             <div class="checker-item">
                 <span>나스닥 등락</span>
-                <span class="tag tag-yellow">-0.12%</span>
+                <span class="tag tag-yellow">-0.22%</span>
             </div>
             <div class="checker-item">
                 <span>원달러 환율</span>
-                <span class="tag tag-orange">1475.30원</span>
+                <span class="tag tag-orange">1476.20원</span>
             </div>
             <div class="checker-item">
                 <span>WTI 유가</span>
@@ -105,7 +105,7 @@
             </div>
             <div class="checker-item">
                 <span>NQ 야간선물</span>
-                <span class="tag tag-green">-0.14%</span>
+                <span class="tag tag-green">-0.24%</span>
             </div>
             
             <div class="score-box">
@@ -116,52 +116,68 @@
         </div>
 
         <div class="portfolio-section">
-            <h2 style="margin-bottom:15px; font-size:1.2rem;">권장 포트폴리오 비중</h2>
+            <h2 style="margin-bottom:15px; font-size:1.2rem;">권장 포트폴리오 (현 시장: Bull)</h2>
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('bull')">BULL</button>
-                <button class="tab-btn " onclick="switchTab('base')">BASE</button>
-                <button class="tab-btn " onclick="switchTab('bear')">BEAR</button>
+                <button class="tab-btn active" onclick="switchTab('cur')">RECOMMENDED</button>
+                <button class="tab-btn" onclick="switchTab('bull')">BULL</button>
+                <button class="tab-btn" onclick="switchTab('base')">BASE</button>
+                <button class="tab-btn" onclick="switchTab('bear')">BEAR</button>
             </div>
 
-            <div id="bull" class="portfolio-content active">
-                <p>강세장 시나리오: 공격적 주식 비중 확대</p>
+            <!-- 현재 추천 비중 -->
+            <div id="cur" class="portfolio-content active">
+                <p style="color:var(--accent-orange); font-weight:bold; margin-bottom:10px;">📊 강세장: 성장주 및 기술주 비중을 확대하고 적극적인 수익 극대화 전략이 유효합니다.</p>
                 <div class="weight-bar">
-                    <div class="w-cash" style="width: 60%"></div>
-                    <div class="w-stock" style="width: 30%"></div>
+                    <div class="w-cash" style="width: 20%"></div>
+                    <div class="w-stock" style="width: 70%"></div>
                     <div class="w-bond" style="width: 10%"></div>
                 </div>
                 <ul style="font-size:0.9rem; color:var(--text-dim); list-style:none;">
-                    <li>🎯 현금(대기): 60%</li>
-                    <li>💹 주식: 30%</li>
-                    <li>⚓ 채권: 10%</li>
+                    <li>🎯 현금(대기): 20%</li>
+                    <li>💹 주식(성장/가치): 70%</li>
+                    <li>⚓ 채권/안전자산: 10%</li>
                 </ul>
             </div>
 
-            <div id="base" class="portfolio-content ">
-                <p>중립장 시나리오: 균형 잡힌 분산 투자</p>
+            <div id="bull" class="portfolio-content">
+                <p>강세장 시나리오: 공격적 주식 비중 확대</p>
                 <div class="weight-bar">
                     <div class="w-cash" style="width: 20%"></div>
-                    <div class="w-stock" style="width: 50%"></div>
-                    <div class="w-bond" style="width: 30%"></div>
+                    <div class="w-stock" style="width: 70%"></div>
+                    <div class="w-bond" style="width: 10%"></div>
                 </div>
                 <ul style="font-size:0.9rem; color:var(--text-dim); list-style:none;">
-                    <li>🎯 현금(대기): 20%</li>
-                    <li>💹 주식: 50%</li>
-                    <li>⚓ 채권: 30%</li>
+                    <li>🚀 주식(반도체, AI, 2차전지): 70%</li>
+                    <li>💵 현금(추가 매수 여력): 20%</li>
+                    <li>🛡️ 채권(최소 비중): 10%</li>
                 </ul>
             </div>
 
-            <div id="bear" class="portfolio-content ">
-                <p>약세장 시나리오: 방어적 자산 비중 확대</p>
+            <div id="base" class="portfolio-content">
+                <p>중립장 시나리오: 균형 잡힌 분산 투자</p>
                 <div class="weight-bar">
-                    <div class="w-cash" style="width: 10%"></div>
-                    <div class="w-stock" style="width: 30%"></div>
-                    <div class="w-bond" style="width: 60%"></div>
+                    <div class="w-cash" style="width: 40%"></div>
+                    <div class="w-stock" style="width: 40%"></div>
+                    <div class="w-bond" style="width: 20%"></div>
                 </div>
                 <ul style="font-size:0.9rem; color:var(--text-dim); list-style:none;">
-                    <li>🎯 현금(대기): 10%</li>
-                    <li>💹 주식: 30%</li>
-                    <li>⚓ 채권: 60%</li>
+                    <li>⚖️ 주식(대형주, 배당주): 40%</li>
+                    <li>💰 현금(박스권 트레이딩): 40%</li>
+                    <li>📖 채권/리츠: 20%</li>
+                </ul>
+            </div>
+
+            <div id="bear" class="portfolio-content">
+                <p>약세장 시나리오: 방어적 자산 비중 확대</p>
+                <div class="weight-bar">
+                    <div class="w-cash" style="width: 70%"></div>
+                    <div class="w-stock" style="width: 10%"></div>
+                    <div class="w-bond" style="width: 20%"></div>
+                </div>
+                <ul style="font-size:0.9rem; color:var(--text-dim); list-style:none;">
+                    <li>💸 현금(달러, 원화 확보): 70%</li>
+                    <li>🏢 주식(방어주 - 통신, 유틸리티): 10%</li>
+                    <li>🥇 안전자산(금, 채권): 20%</li>
                 </ul>
             </div>
         </div>
