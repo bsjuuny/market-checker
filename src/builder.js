@@ -1,0 +1,192 @@
+export function buildHtml(marketData, analysis) {
+  const { kospi, kosdaq, nasdaq, exchangeRate, wti, nqFutures } = marketData;
+  const { tags, bearScore, mode, allocation, timestamp } = analysis;
+
+  const getSnapClass = (rate) => {
+    const val = parseFloat(rate.replace(/[%+]/g, ''));
+    if (val > 0) return 'up';
+    if (val < 0) return 'down';
+    return 'neutral';
+  };
+
+  return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>국장 방향 체크리스트</title>
+    <style>
+        :root {
+            --bg: #0a0f1e;
+            --card-bg: #161c2d;
+            --text: #ffffff;
+            --text-dim: #a0a0a0;
+            --accent-green: #00d26a;
+            --accent-red: #ff4757;
+            --accent-yellow: #ffd32a;
+            --accent-orange: #ff6b35;
+            --accent-purple: #a55eea;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Pretendard', sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        header { margin-bottom: 30px; text-align: center; }
+        header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        header p { color: var(--text-dim); font-size: 0.9rem; }
+
+        .grid-snap { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .snap-card { background: var(--card-bg); padding: 15px; border-radius: 12px; border-left: 4px solid #333; }
+        .snap-card.up { border-left-color: var(--accent-red); }
+        .snap-card.down { border-left-color: var(--accent-green); }
+        .snap-card h3 { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 5px; }
+        .snap-card .price { font-size: 1.2rem; font-weight: bold; }
+        .snap-card .rate { font-size: 0.9rem; }
+        .up .rate { color: var(--accent-red); }
+        .down .rate { color: var(--accent-green); }
+
+        .checker-section { background: var(--card-bg); padding: 20px; border-radius: 16px; margin-bottom: 30px; }
+        .checker-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #2d3446; }
+        .checker-item:last-child { border-bottom: none; }
+        
+        .tag { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
+        .tag-green { background: rgba(0, 210, 106, 0.2); color: var(--accent-green); }
+        .tag-yellow { background: rgba(255, 211, 42, 0.2); color: var(--accent-yellow); }
+        .tag-orange { background: rgba(255, 107, 53, 0.2); color: var(--accent-orange); }
+        .tag-red { background: rgba(255, 71, 87, 0.2); color: var(--accent-red); }
+        .tag-purple { background: rgba(165, 94, 234, 0.2); color: var(--accent-purple); }
+
+        .score-box { text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; margin-top: 20px; }
+        .score-val { font-size: 2.5rem; font-weight: 800; color: var(--accent-yellow); }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: #2d3446; color: #fff; border-radius: 8px; cursor: pointer; }
+        .tab-btn.active { background: var(--accent-orange); }
+        .portfolio-content { display: none; background: #161c2d; padding: 20px; border-radius: 12px; }
+        .portfolio-content.active { display: block; }
+        
+        .weight-bar { display: flex; height: 30px; border-radius: 15px; overflow: hidden; margin: 15px 0; }
+        .w-cash { background: var(--accent-green); }
+        .w-stock { background: var(--accent-red); }
+        .w-bond { background: var(--accent-purple); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>국장 방향 체크리스트</h1>
+            <p>마지막 업데이트: ${timestamp}</p>
+        </header>
+
+        <div class="grid-snap">
+            <div class="snap-card ${getSnapClass(kospi.rate)}">
+                <h3>KOSPI</h3>
+                <div class="price">${kospi.price}</div>
+                <div class="rate">${kospi.rate}</div>
+            </div>
+            <div class="snap-card ${getSnapClass(kosdaq.rate)}">
+                <h3>KOSDAQ</h3>
+                <div class="price">${kosdaq.price}</div>
+                <div class="rate">${kosdaq.rate}</div>
+            </div>
+            <div class="snap-card ${getSnapClass(nasdaq.rate)}">
+                <h3>NASDAQ</h3>
+                <div class="price">${nasdaq.price}</div>
+                <div class="rate">${nasdaq.rate}</div>
+            </div>
+            <div class="snap-card">
+                <h3>USD/KRW</h3>
+                <div class="price">${exchangeRate}</div>
+            </div>
+        </div>
+
+        <div class="checker-section">
+            <div class="checker-item">
+                <span>나스닥 등락</span>
+                <span class="tag ${tags.nasdaq}">${nasdaq.rate}</span>
+            </div>
+            <div class="checker-item">
+                <span>원달러 환율</span>
+                <span class="tag ${tags.exchange}">${exchangeRate}원</span>
+            </div>
+            <div class="checker-item">
+                <span>WTI 유가</span>
+                <span class="tag ${tags.wti}">$${wti}</span>
+            </div>
+            <div class="checker-item">
+                <span>NQ 야간선물</span>
+                <span class="tag ${getSnapClass(nqFutures.rate) === 'up' ? 'tag-red' : 'tag-green'}">${nqFutures.rate}</span>
+            </div>
+            
+            <div class="score-box">
+                <p>Bear Score</p>
+                <div class="score-val">${bearScore} / 7</div>
+                <p>현재 시장 모드: <strong style="color:var(--accent-orange)">${mode}</strong></p>
+            </div>
+        </div>
+
+        <div class="portfolio-section">
+            <h2 style="margin-bottom:15px; font-size:1.2rem;">권장 포트폴리오 비중</h2>
+            <div class="tabs">
+                <button class="tab-btn ${mode === 'Bull' ? 'active' : ''}" onclick="switchTab('bull')">BULL</button>
+                <button class="tab-btn ${mode === 'Base' ? 'active' : ''}" onclick="switchTab('base')">BASE</button>
+                <button class="tab-btn ${mode === 'Bear' ? 'active' : ''}" onclick="switchTab('bear')">BEAR</button>
+            </div>
+
+            <div id="bull" class="portfolio-content ${mode === 'Bull' ? 'active' : ''}">
+                <p>강세장 시나리오: 공격적 주식 비중 확대</p>
+                <div class="weight-bar">
+                    <div class="w-cash" style="width: 60%"></div>
+                    <div class="w-stock" style="width: 30%"></div>
+                    <div class="w-bond" style="width: 10%"></div>
+                </div>
+                <ul style="font-size:0.9rem; color:var(--text-dim); list-style:none;">
+                    <li>🎯 현금(대기): 60%</li>
+                    <li>💹 주식: 30%</li>
+                    <li>⚓ 채권: 10%</li>
+                </ul>
+            </div>
+
+            <div id="base" class="portfolio-content ${mode === 'Base' ? 'active' : ''}">
+                <p>중립장 시나리오: 균형 잡힌 분산 투자</p>
+                <div class="weight-bar">
+                    <div class="w-cash" style="width: 20%"></div>
+                    <div class="w-stock" style="width: 50%"></div>
+                    <div class="w-bond" style="width: 30%"></div>
+                </div>
+                <ul style="font-size:0.9rem; color:var(--text-dim); list-style:none;">
+                    <li>🎯 현금(대기): 20%</li>
+                    <li>💹 주식: 50%</li>
+                    <li>⚓ 채권: 30%</li>
+                </ul>
+            </div>
+
+            <div id="bear" class="portfolio-content ${mode === 'Bear' ? 'active' : ''}">
+                <p>약세장 시나리오: 방어적 자산 비중 확대</p>
+                <div class="weight-bar">
+                    <div class="w-cash" style="width: 10%"></div>
+                    <div class="w-stock" style="width: 30%"></div>
+                    <div class="w-bond" style="width: 60%"></div>
+                </div>
+                <ul style="font-size:0.9rem; color:var(--text-dim); list-style:none;">
+                    <li>🎯 현금(대기): 10%</li>
+                    <li>💹 주식: 30%</li>
+                    <li>⚓ 채권: 60%</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(id) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.portfolio-content').forEach(content => content.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
+</body>
+</html>`;
+}

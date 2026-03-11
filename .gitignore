@@ -1,0 +1,4 @@
+node_modules/
+.DS_Store
+.env
+docs/index.html (if you don't want to track it, but here we explicitly track it for GH Pages)
