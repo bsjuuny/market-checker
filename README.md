@@ -33,11 +33,23 @@
 2. Branch를 `main` (또는 해당 브랜치), Folder를 `/docs`로 설정합니다.
 
 ### 텔레그램 알림 설정
-GitHub Actions에서 텔레그램 알림을 받으려면 다음 비밀 키(Secrets)를 설정해야 합니다:
-1. GitHub 저장소 -> `Settings` -> `Secrets and variables` -> `Actions`로 이동.
+#### 1. 로컬 환경 (.env 파일)
+로컬에서 테스트하려면 프로젝트 루트 폴더에 `.env` 파일을 생성하고 정보를 입력하세요:
+```env
+TELEGRAM_BOT_TOKEN=여러분의_봇_토큰
+TELEGRAM_CHAT_ID=여러분의_채팅_ID
+```
+
+#### 2. GitHub Actions (Remote)
+GitHub 저장소 -> `Settings` -> `Secrets and variables` -> `Actions`로 이동.
 2. `New repository secret` 버튼 클릭 후 다음 항목 추가:
    - `TELEGRAM_BOT_TOKEN`: 텔레그램 BotFather에서 발급받은 봇 토큰.
    - `TELEGRAM_CHAT_ID`: 알림을 받을 채팅방 ID (또는 본인의 ID).
+
+> [!TIP]
+> **"chat not found" 에러가 발생하나요?**
+> 1. 텔레그램에서 생성한 봇에게 **먼저 아무 메시지나 보내거나 `/start`를 클릭**해야 합니다. (봇이 사용자를 먼저 찾을 수 없습니다.)
+> 2. `TELEGRAM_CHAT_ID`가 정확한지 확인하세요. [@userinfobot](https://t.me/userinfobot)을 통해 본인의 ID를 확인할 수 있습니다.
 
 ## 배포 경로
 - `https://[사용자명].github.io/market-checker/` (저장소 이름에 따라 다를 수 있습니다.)

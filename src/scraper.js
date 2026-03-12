@@ -1,23 +1,71 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import iconv from 'iconv-lite';
 
 const NAVER_FINANCE_URL = 'https://finance.naver.com';
 
+const USER_AGENTS = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
+  'Mozilla/5.0 (AppleWebKit/537.36, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edge/121.0.0.0'
+];
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 /**
- * 네이버 금융에서 데이터를 가져오는 공통 유틸리티
+ * 네이버 금융에서 데이터를 가져오는 공통 유틸리티 (인코딩 처리 및 차단 방지)
  */
-async function fetchHtml(url) {
-  try {
-    const { data } = await axios.get(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+async function fetchHtml(url, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      // 랜덤 지연 (0.5s ~ 1.5s) 적용하여 봇 탐지 회피
+      if (i > 0) await sleep(Math.random() * 1000 + 500 * Math.pow(2, i));
+
+      const randomUA = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+      const response = await axios.get(url, {
+        responseType: 'arraybuffer',
+        timeout: 10000,
+        headers: {
+          'User-Agent': randomUA,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Referer': 'https://finance.naver.com/',
+          'Upgrade-Insecure-Requests': '1'
+        }
+      });
+      
+      const contentType = response.headers['content-type'] || '';
+      let charset = contentType.includes('charset=') 
+        ? contentType.split('charset=')[1].toLowerCase() 
+        : 'euc-kr';
+
+      let decodedHtml = iconv.decode(response.data, charset);
+      
+      if (decodedHtml.includes('charset=utf-8') || decodedHtml.includes('charset="utf-8"')) {
+        decodedHtml = iconv.decode(response.data, 'utf-8');
       }
-    });
-    return cheerio.load(data);
-  } catch (error) {
-    console.error(`Error fetching ${url}:`, error.message);
-    return null;
+
+      return cheerio.load(decodedHtml);
+    } catch (error) {
+      console.warn(`[Retry ${i+1}/${retries}] Failed to fetch ${url}: ${error.message}`);
+      if (i === retries - 1) {
+        console.error(`Final failure for ${url}`);
+        return null;
+      }
+    }
   }
+}
+
+/**
+ * 텍스트에서 등락률(+0.00%)만 추출하는 헬퍼
+ */
+function extractRate(text) {
+  const match = text.replace(/[\s]/g, '').match(/[+-]?\d+(\.\d+)?%/);
+  return match ? match[0] : '0%';
 }
 
 /**
@@ -28,10 +76,10 @@ export async function fetchDomesticIndices() {
   if (!$) return { kospi: { price: '0', rate: '0' }, kosdaq: { price: '0', rate: '0' } };
 
   const kospiPrice = $('#KOSPI_now').text().trim();
-  const kospiRate = $('#KOSPI_change').text().trim().split(' ')[1] || '0%';
+  const kospiRate = extractRate($('#KOSPI_change').text());
   
   const kosdaqPrice = $('#KOSDAQ_now').text().trim();
-  const kosdaqRate = $('#KOSDAQ_change').text().trim().split(' ')[1] || '0%';
+  const kosdaqRate = extractRate($('#KOSDAQ_change').text());
 
   return {
     kospi: { price: kospiPrice, rate: kospiRate },
@@ -46,43 +94,91 @@ export async function fetchMarketIndex() {
   const $ = await fetchHtml(`${NAVER_FINANCE_URL}/marketindex/`);
   if (!$) return { exchangeRate: '0', wti: '0' };
 
-  // 환율 (첫 번째 항목이 보통 원달러 환율)
-  const exchangeRate = $('.exchange_value').first().text().trim().replace(/,/g, '');
+  // 원달러 환율: a.head.usd span.value 가 가장 정확
+  const exchangeRate = $('a.head.usd span.value').text().trim().replace(/,/g, '') || 
+                       $('.exchange_value').first().text().trim().replace(/,/g, '');
 
-  // WTI 유가 (원자재 탭의 데이터는 별도 페이지일 수 있으나 메인에서도 일부 노출됨)
-  // 여기서는 명세에 따라 #oilList WTI를 찾음. 실제 구조 확인 필요.
-  const wti = $('#oilList .value').first().text().trim() || '0';
+  // WTI 유가: a.head.wti span.value
+  const wti = $('a.head.wti span.value').text().trim() || 
+              $('.oil .value').first().text().trim() || '0';
 
   return { exchangeRate, wti };
 }
 
 /**
- * 나스닥 지수 수집
+ * 나스닥 지수 수집 (정적 HTML에 없으므로 스크립트 데이터 파싱)
  */
 export async function fetchNasdaq() {
   const $ = await fetchHtml(`${NAVER_FINANCE_URL}/world/`);
   if (!$) return { price: '0', rate: '0%' };
 
-  // 해외증시 테이블에서 나스닥 찾기 (보통 상단에 위치)
-  const nasdaqRow = $('tr:contains("나스닥")');
-  const price = nasdaqRow.find('td').eq(1).text().trim();
-  const rate = nasdaqRow.find('td').eq(3).text().trim();
+  try {
+    const scripts = $('script').map((i, el) => $(el).html()).get();
+    const targetScript = scripts.find(s => s.includes('americaData'));
+    
+    if (targetScript) {
+      // "NAS@IXIC" 블록 찾기 및 데이터 추출
+      const blockRegex = /"NAS@IXIC"\s*:\s*\{([\s\S]*?)\}/;
+      const blockMatch = targetScript.match(blockRegex);
+      
+      if (blockMatch && blockMatch[1]) {
+        const block = blockMatch[1];
+        const lastMatch = block.match(/"last"\s*:\s*([\d.]+)/);
+        const rateMatch = block.match(/"rate"\s*:\s*([-\d.]+)/);
+        
+        if (lastMatch && rateMatch) {
+          const rateVal = parseFloat(rateMatch[1]);
+          return { 
+            price: lastMatch[1], 
+            rate: (rateVal > 0 ? '+' : '') + rateVal + '%' 
+          };
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error extracting Nasdaq data:', e.message);
+  }
 
-  return { price, rate };
+  // 폴백: 기존 텍스트 기반 검색
+  const nasdaqRow = $('tr').filter((i, el) => $(el).text().includes('나스닥 종합')).first();
+  let price = nasdaqRow.find('td').eq(2).text().trim() || '0';
+  let rate = nasdaqRow.find('td').eq(4).text().trim() || '0%';
+  return { price, rate: rate.includes('%') ? rate : extractRate(rate) };
 }
 
 /**
- * 나스닥100 선물 수집 (마켓인덱스 해외선물 탭 활용)
+ * 나스닥100 지수 수집 (선물 대용)
  */
 export async function fetchNqFutures() {
-  const $ = await fetchHtml(`${NAVER_FINANCE_URL}/marketindex/?tabSel=worldExchange`);
+  const $ = await fetchHtml(`${NAVER_FINANCE_URL}/world/`);
   if (!$) return { rate: '0%' };
 
-  // 나스닥 100 선물 찾기
-  const nqRow = $('tr:contains("나스닥100 선물")');
-  const rate = nqRow.find('td').last().text().trim() || '0%';
+  try {
+    const scripts = $('script').map((i, el) => $(el).html()).get();
+    const targetScript = scripts.find(s => s.includes('americaData'));
+    
+    if (targetScript) {
+      // "NAS@NDX" 블록 찾기 및 데이터 추출
+      const blockRegex = /"NAS@NDX"\s*:\s*\{([\s\S]*?)\}/;
+      const blockMatch = targetScript.match(blockRegex);
+      
+      if (blockMatch && blockMatch[1]) {
+        const block = blockMatch[1];
+        const rateMatch = block.match(/"rate"\s*:\s*([-\d.]+)/);
+        
+        if (rateMatch) {
+          const rateVal = parseFloat(rateMatch[1]);
+          return { rate: (rateVal > 0 ? '+' : '') + rateVal + '%' };
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error extracting NQ futures data:', e.message);
+  }
 
-  return { rate };
+  const nqRow = $('tr').filter((i, el) => $(el).text().includes('나스닥 100')).first();
+  let rate = nqRow.find('td').eq(4).text().trim() || '0%';
+  return { rate: rate.includes('%') ? rate : extractRate(rate) };
 }
 
 /**
@@ -96,7 +192,7 @@ export async function fetchAllMarketData() {
     fetchNqFutures()
   ]);
 
-  const data = {
+  return {
     kospi: results[0].status === 'fulfilled' ? results[0].value.kospi : { price: '-', rate: '-' },
     kosdaq: results[0].status === 'fulfilled' ? results[0].value.kosdaq : { price: '-', rate: '-' },
     exchangeRate: results[1].status === 'fulfilled' ? results[1].value.exchangeRate : '0',
@@ -104,6 +200,4 @@ export async function fetchAllMarketData() {
     nasdaq: results[2].status === 'fulfilled' ? results[2].value : { price: '-', rate: '0%' },
     nqFutures: results[3].status === 'fulfilled' ? results[3].value : { rate: '0%' }
   };
-
-  return data;
 }
