@@ -35,5 +35,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/index.html
-          git commit -m "docs: Daily market update $(date +'%Y-%m-%d')" || exit 0
+          git commit -m "docs: automated market update" || exit 0
+          git pull --rebase origin main
           git push
