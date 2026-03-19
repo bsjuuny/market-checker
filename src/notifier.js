@@ -44,7 +44,10 @@ export async function sendTelegramMessage(marketData, analysis) {
       chat_id: chatId,
       text: text,
       parse_mode: 'HTML'
-    }, { timeout: 30000 });
+    }, { 
+      timeout: 30000,
+      family: 4
+    });
     console.log('✅ Telegram notification sent successfully.');
   } catch (error) {
     console.error('❌ Failed to send Telegram message:');
