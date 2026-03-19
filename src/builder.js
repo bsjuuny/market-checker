@@ -152,13 +152,6 @@ export function buildHtml(marketData, analysis) {
     </style>
 </head>
 <body>
-    <div class="warning-banner">
-        <div class="warning-icon">⚠️</div>
-        <div class="warning-content">
-            <strong>핵심 투자 주의 사항</strong>
-            본 자료는 기술적 지표에 기반한 자동 분석 결과일 뿐, 어떠한 경우에도 투자 결과에 대한 책임을 지지 않습니다. 시장의 변동성은 예측 불가능하므로 반드시 본인의 책임 하에 신중히 결정하시기 바랍니다.
-        </div>
-    </div>
     <div class="header">
         <div class="header-badge"><span class="dot-live"></span> ${timestamp} 기준 업데이트 완료</div>
         <h1>국외 전산 지표 기반<br><span>국장 방향 체크리스트</span></h1>
@@ -221,6 +214,13 @@ export function buildHtml(marketData, analysis) {
         </div>
     </div>
 
+    <div class="warning-banner" style="margin-top: 20px; margin-bottom: 20px;">
+        <div class="warning-icon">⚠️</div>
+        <div class="warning-content">
+            <strong>핵심 투자 주의 사항</strong>
+            본 자료는 기술적 지표에 기반한 자동 분석 결과일 뿐, 어떠한 경우에도 투자 결과에 대한 책임을 지지 않습니다. 시장의 변동성은 예측 불가능하므로 반드시 본인의 책임 하에 신중히 결정하시기 바랍니다.
+        </div>
+    </div>
     <div class="section-title">💼 ${mode} CASE PORTFOLIO</div>
     <div class="portfolio-section">
         <p style="font-size: 14px; margin-bottom: 10px; color: var(--accent-orange); font-weight: bold;">🎯 ${details}</p>

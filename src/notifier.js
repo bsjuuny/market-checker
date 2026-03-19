@@ -16,7 +16,7 @@ export async function sendTelegramMessage(marketData, analysis) {
   const { bearScore, mode, timestamp } = analysis;
 
   const emoji = mode === 'Bull' ? '🚀' : mode === 'Base' ? '⚖️' : '🐻';
-  
+
   const text = `
 <b>${emoji} 국장 방향 체크리스트 요약</b>
 📅 ${timestamp}
@@ -32,12 +32,14 @@ export async function sendTelegramMessage(marketData, analysis) {
 - Bear Score: <b>${bearScore} / 7</b>
 - 시장 모드: <b>${mode}</b>
 
-🔗 <a href="https://github.com/bsjuuny/market-checker">상세 대시보드 보기</a>
+🔗 <a href="https://bsjuuny.github.io/market-checker/">상세 보기</a>
+🔗 <a href="https://github.com/bsjuuny/market-checker/actions">상세 대시보드 보기</a>
+
   `.trim();
 
   try {
     console.log(`📡 Sending to Telegram... (Token: ${token.substring(0, 5)}***, ChatId: ${chatId})`);
-    
+
     await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
       chat_id: chatId,
       text: text,
