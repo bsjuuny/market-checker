@@ -1,8 +1,9 @@
 name: Daily Market Update
 
 on:
-  schedule:
-    - cron: '50 21 * * 1-5' # 평일 KST 06:50 (UTC 21:50)
+  # schedule 비활성화 — PM2 스케줄러(run-market-checker.mjs)가 동일 작업을 수행하므로 중복 방지
+  # schedule:
+  #   - cron: '50 21 * * 1-5' # 평일 KST 06:50 (UTC 21:50)
   workflow_dispatch: # 수동 실행 버튼
 
 env:
