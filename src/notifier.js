@@ -1,20 +1,12 @@
-import axios from 'axios';
+import { sendNotification } from '../../antigravity-bot/scripts/notify.mjs';
 
 /**
  * 텔레그램으로 시장 요약 보고서를 전송합니다.
+ * 전역 notify.mjs 허브를 사용하여 안정성과 레이트 리밋(Alert Shield) 통합
  */
 export async function sendTelegramMessage(marketData, analysis) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-
-  if (!token || !chatId) {
-    console.warn('⚠️ Telegram token or chat ID is missing. Skipping notification.');
-    return;
-  }
-
-  const { kospi, kosdaq, nasdaq, exchangeRate, nqFutures } = marketData;
+  const { kospi, kosdaq, nasdaq, exchangeRate, nqFutures, cnnFearGreed, vki } = marketData;
   const { bearScore, mode, timestamp } = analysis;
-
   const emoji = mode === 'Bull' ? '🚀' : mode === 'Base' ? '⚖️' : '🐻';
 
   const text = `
@@ -27,36 +19,24 @@ export async function sendTelegramMessage(marketData, analysis) {
 - NASDAQ: ${nasdaq.price} (${nasdaq.rate})
 - 환율: ${exchangeRate}원
 - NQ선물: ${nqFutures.rate}
+- CNN 공포탐욕: ${cnnFearGreed ? `${cnnFearGreed.score} (${cnnFearGreed.rating})` : 'N/A'}
+- VKOSPI: ${vki ? vki.value.toFixed(2) : 'N/A'}
 
 🧠 <b>판단 결과</b>
-- Bear Score: <b>${bearScore} / 7</b>
+- Bear Score: <b>${bearScore} / 11</b>
 - 시장 모드: <b>${mode}</b>
 
 🔗 <a href="https://bsjuuny.github.io/market-checker/">상세 보기</a>
 🔗 <a href="https://github.com/bsjuuny/market-checker/actions">상세 대시보드 보기</a>
-
   `.trim();
 
   try {
-    console.log(`📡 Sending to Telegram... (Token: ${token.substring(0, 5)}***, ChatId: ${chatId})`);
-
-    await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
-      chat_id: chatId,
-      text: text,
+    await sendNotification(text, {
+      prefix: '⚖️ [Market-Checker]',
       parse_mode: 'HTML'
-    }, { 
-      timeout: 30000,
-      family: 4
     });
-    console.log('✅ Telegram notification sent successfully.');
+    console.log('✅ Telegram notification sent via global hub.');
   } catch (error) {
-    console.error('❌ Failed to send Telegram message:');
-    if (error.response) {
-      console.error('  Status:', error.response.status);
-      console.error('  Data:', JSON.stringify(error.response.data));
-    } else {
-      console.error('  Message:', error.message);
-      console.error('  Code:', error.code);
-    }
+    console.error('❌ Failed to send Telegram message:', error.message);
   }
 }
