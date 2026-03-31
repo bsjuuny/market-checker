@@ -5,7 +5,7 @@ import { sendNotification } from '../../antigravity-bot/scripts/notify.mjs';
  * 전역 notify.mjs 허브를 사용하여 안정성과 레이트 리밋(Alert Shield) 통합
  */
 export async function sendTelegramMessage(marketData, analysis) {
-  const { kospi, kosdaq, nasdaq, exchangeRate, nqFutures, cnnFearGreed, vki } = marketData;
+  const { kospi, kosdaq, nasdaq, exchangeRate, nqFutures, cnnFearGreed } = marketData;
   const { bearScore, mode, timestamp } = analysis;
   const emoji = mode === 'Bull' ? '🚀' : mode === 'Base' ? '⚖️' : '🐻';
 
@@ -20,10 +20,9 @@ export async function sendTelegramMessage(marketData, analysis) {
 - 환율: ${exchangeRate}원
 - NQ선물: ${nqFutures.rate}
 - CNN 공포탐욕: ${cnnFearGreed ? `${cnnFearGreed.score} (${cnnFearGreed.rating})` : 'N/A'}
-- VKOSPI: ${vki ? vki.value.toFixed(2) : 'N/A'}
 
 🧠 <b>판단 결과</b>
-- Bear Score: <b>${bearScore} / 11</b>
+- Bear Score: <b>${bearScore} / 9</b>
 - 시장 모드: <b>${mode}</b>
 
 🔗 <a href="https://bsjuuny.github.io/market-checker/">상세 보기</a>

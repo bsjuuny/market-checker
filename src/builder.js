@@ -1,5 +1,5 @@
 export function buildHtml(marketData, analysis) {
-  const { kospi, kosdaq, nasdaq, exchangeRate, wti, nqFutures, cnnFearGreed, vki } = marketData;
+  const { kospi, kosdaq, nasdaq, exchangeRate, wti, nqFutures, cnnFearGreed } = marketData;
   const { tags, bearScore, mode, allocations, details, timestamp } = analysis;
 
   const getSnapClass = (rate) => {
@@ -194,16 +194,11 @@ export function buildHtml(marketData, analysis) {
         </div>
     </div>
 
-    <div class="snapshot-grid" style="margin-top:-18px; grid-template-columns: repeat(2, 1fr);">
+    <div class="snapshot-grid" style="margin-top:-18px; grid-template-columns: repeat(1, 1fr);">
         <div class="snap-card ${cnnFearGreed && cnnFearGreed.score < 25 ? 'down' : 'up'}">
             <div class="snap-label">CNN 공포탐욕지수</div>
             <div class="snap-value ${cnnFearGreed && cnnFearGreed.score < 25 ? 'down' : ''}">${cnnFearGreed ? cnnFearGreed.score : 'N/A'}</div>
             <div class="snap-change">${cnnFearGreed ? cnnFearGreed.rating : '-'}</div>
-        </div>
-        <div class="snap-card ${vki && vki.value > 30 ? 'down' : 'up'}">
-            <div class="snap-label">VKOSPI (변동성)</div>
-            <div class="snap-value ${vki && vki.value > 30 ? 'down' : ''}">${vki ? vki.value.toFixed(2) : 'N/A'}</div>
-            <div class="snap-change">한국판 VIX</div>
         </div>
     </div>
 
@@ -228,10 +223,6 @@ export function buildHtml(marketData, analysis) {
         <div class="check-item">
             <div class="check-desc"><strong>CNN 공포탐욕지수</strong> — 시장 심리 (25 이하: Fear, 15 이하: Extreme Fear)</div>
             <span class="check-tag ${tags.cnn}">${cnnFearGreed ? `${cnnFearGreed.score} / 100` : 'N/A'}</span>
-        </div>
-        <div class="check-item">
-            <div class="check-desc"><strong>VKOSPI</strong> — 코스피 변동성 지수 (30 초과: 고변동, 50 초과: 위기)</div>
-            <span class="check-tag ${tags.vki}">${vki ? vki.value.toFixed(2) : 'N/A'}</span>
         </div>
     </div>
 
@@ -259,7 +250,7 @@ export function buildHtml(marketData, analysis) {
         </div>
         <div class="tip-card">
             <span>💡</span>
-            <div><strong>${mode} 모드 대응 전략:</strong> Bear Score ${bearScore}/11를 기록 중입니다. 현재 지배적인 시장 심리에 맞춘 ${mode} 포트폴리오 비중을 준수하며, 개별 종목의 펀더멘털보다는 거시 지표의 흐름을 최우선으로 고려하세요.</div>
+            <div><strong>${mode} 모드 대응 전략:</strong> Bear Score ${bearScore}/9를 기록 중입니다. 현재 지배적인 시장 심리에 맞춘 ${mode} 포트폴리오 비중을 준수하며, 개별 종목의 펀더멘털보다는 거시 지표의 흐름을 최우선으로 고려하세요.</div>
         </div>
     </div>
 
