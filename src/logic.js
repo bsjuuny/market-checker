@@ -3,7 +3,7 @@
  */
 
 export function analyzeMarketData(data) {
-  const { nasdaq, exchangeRate, wti, nqFutures, cnnFearGreed, vki } = data;
+  const { nasdaq, exchangeRate, wti, nqFutures, cnnFearGreed } = data;
 
   // 1. 나스닥 등락률 판단
   const nasdaqRateValue = parseFloat(nasdaq.rate.replace(/[%+]/g, ''));
@@ -37,15 +37,7 @@ export function analyzeMarketData(data) {
     else if (cnnFearGreed.score < 45) cnnTag = 'tag-yellow';
   }
 
-  // 5. VKOSPI 판단
-  let vkiTag = 'tag-green';
-  if (vki) {
-    if (vki.value > 50) vkiTag = 'tag-red';
-    else if (vki.value > 30) vkiTag = 'tag-orange';
-    else if (vki.value > 20) vkiTag = 'tag-yellow';
-  }
-
-  // 6. Bear Score 계산 (항목당 1점씩, 총 /11)
+  // 5. Bear Score 계산 (항목당 1점씩, 총 /9)
   let bearScore = 0;
   const nqFuturesValue = parseFloat(nqFutures.rate.replace(/[%+]/g, ''));
 
@@ -58,10 +50,8 @@ export function analyzeMarketData(data) {
   if (nqFuturesValue < -1.0) bearScore++;
   if (cnnFearGreed && cnnFearGreed.score < 25) bearScore++;
   if (cnnFearGreed && cnnFearGreed.score < 15) bearScore++; // 중첩
-  if (vki && vki.value > 30) bearScore++;
-  if (vki && vki.value > 50) bearScore++; // 중첩
 
-  // 7. 모드 및 비중 결정 (총점 11점 기준)
+  // 6. 모드 및 비중 결정 (총점 9점 기준)
   let mode = 'Base';
   let details = '중립장: 변동성에 대비하며 우량주 중심의 균형 잡힌 포트폴리오를 유지하세요.';
   let allocations = [];
@@ -104,8 +94,7 @@ export function analyzeMarketData(data) {
       nasdaq: nasdaqTag,
       exchange: exchangeTag,
       wti: wtiTag,
-      cnn: cnnTag,
-      vki: vkiTag
+      cnn: cnnTag
     },
     bearScore,
     mode,

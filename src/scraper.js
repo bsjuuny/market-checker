@@ -205,22 +205,6 @@ export async function fetchCnnFearGreed() {
 }
 
 /**
- * VKOSPI (한국 변동성 지수) 수집
- */
-export async function fetchVki() {
-  const $ = await fetchHtml('https://finance.naver.com/sise/sise_index.nhn?code=VKOSPI');
-  if (!$) return null;
-  try {
-    const nowVal = $('#now').text().trim();
-    const val = parseFloat(nowVal.replace(/,/g, ''));
-    if (!isNaN(val) && val > 0) return { value: val };
-  } catch (e) {
-    console.warn('[SCRAPER] VKI 수집 실패:', e.message);
-  }
-  return null;
-}
-
-/**
  * 모든 데이터 통합 수집
  */
 export async function fetchAllMarketData() {
@@ -229,8 +213,7 @@ export async function fetchAllMarketData() {
     fetchMarketIndex(),
     fetchNasdaq(),
     fetchNqFutures(),
-    fetchCnnFearGreed(),
-    fetchVki()
+    fetchCnnFearGreed()
   ]);
 
   return {
@@ -240,7 +223,6 @@ export async function fetchAllMarketData() {
     wti: results[1].status === 'fulfilled' ? results[1].value.wti : '0',
     nasdaq: results[2].status === 'fulfilled' ? results[2].value : { price: '-', rate: '0%' },
     nqFutures: results[3].status === 'fulfilled' ? results[3].value : { rate: '0%' },
-    cnnFearGreed: results[4].status === 'fulfilled' ? results[4].value : null,
-    vki: results[5].status === 'fulfilled' ? results[5].value : null
+    cnnFearGreed: results[4].status === 'fulfilled' ? results[4].value : null
   };
 }
