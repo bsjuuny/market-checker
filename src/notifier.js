@@ -18,6 +18,7 @@ export async function sendTelegramMessage(marketData, analysis) {
 - KOSDAQ: ${kosdaq.price} (${kosdaq.rate})
 - NASDAQ: ${nasdaq.price} (${nasdaq.rate})
 - 환율: ${exchangeRate}원
+- WTI유가: $${marketData.wti}
 - NQ선물: ${nqFutures.rate}
 - CNN 공포탐욕: ${cnnFearGreed ? `${cnnFearGreed.score} (${cnnFearGreed.rating})` : 'N/A'}
 
