@@ -1,6 +1,11 @@
 export function buildHtml(marketData, analysis) {
-  const { kospi, kosdaq, nasdaq, exchangeRate, wti, nqFutures, cnnFearGreed } = marketData;
-  const { tags, bearScore, mode, allocations, details, timestamp } = analysis;
+  const { kospi, kosdaq, nasdaq, exchangeRate, exchangeChange, wti, nqFutures, sox, spx,
+          eurostoxx, dax, ftse, nikkei, hangseng, shanghai, cnnFearGreed, foreignInvestor } = marketData;
+  const { tags, bearScore, bearScoreMax, mode, allocations, details, scores, timestamp } = analysis;
+
+  const foreignStr = foreignInvestor
+    ? `${foreignInvestor.foreign >= 0 ? '+' : ''}${foreignInvestor.foreign.toLocaleString()}억원`
+    : 'N/A';
 
   const getSnapClass = (rate) => {
     const val = parseFloat(rate.replace(/[%+]/g, ''));
@@ -194,35 +199,119 @@ export function buildHtml(marketData, analysis) {
         </div>
     </div>
 
-    <div class="snapshot-grid" style="margin-top:-18px; grid-template-columns: repeat(1, 1fr);">
+    <div class="snapshot-grid" style="margin-top:-18px;">
+        <div class="snap-card ${getSnapClass(sox.rate)}">
+            <div class="snap-label">SOX 반도체</div>
+            <div class="snap-value ${getSnapClass(sox.rate)}">${sox.rate}</div>
+            <div class="snap-change">필라델피아 반도체</div>
+        </div>
+        <div class="snap-card ${getSnapClass(spx.rate)}">
+            <div class="snap-label">S&amp;P 500</div>
+            <div class="snap-value ${getSnapClass(spx.rate)}">${spx.rate}</div>
+            <div class="snap-change">미국 전체 시장</div>
+        </div>
         <div class="snap-card ${cnnFearGreed && cnnFearGreed.score < 25 ? 'down' : 'up'}">
-            <div class="snap-label">CNN 공포탐욕지수</div>
+            <div class="snap-label">CNN 공포탐욕</div>
             <div class="snap-value ${cnnFearGreed && cnnFearGreed.score < 25 ? 'down' : ''}">${cnnFearGreed ? cnnFearGreed.score : 'N/A'}</div>
             <div class="snap-change">${cnnFearGreed ? cnnFearGreed.rating : '-'}</div>
+        </div>
+    </div>
+
+    <div class="snapshot-grid" style="margin-top:-18px;">
+        <div class="snap-card ${getSnapClass(eurostoxx.rate)}">
+            <div class="snap-label">EURO STOXX 50</div>
+            <div class="snap-value ${getSnapClass(eurostoxx.rate)}">${eurostoxx.rate}</div>
+            <div class="snap-change">유럽 대표지수</div>
+        </div>
+        <div class="snap-card ${getSnapClass(dax.rate)}">
+            <div class="snap-label">DAX (독일)</div>
+            <div class="snap-value ${getSnapClass(dax.rate)}">${dax.rate}</div>
+            <div class="snap-change">유럽 제조·수출</div>
+        </div>
+        <div class="snap-card ${getSnapClass(ftse.rate)}">
+            <div class="snap-label">FTSE 100</div>
+            <div class="snap-value ${getSnapClass(ftse.rate)}">${ftse.rate}</div>
+            <div class="snap-change">영국</div>
+        </div>
+    </div>
+
+    <div class="snapshot-grid" style="margin-top:-18px;">
+        <div class="snap-card ${getSnapClass(nikkei.rate)}">
+            <div class="snap-label">닛케이 225</div>
+            <div class="snap-value ${getSnapClass(nikkei.rate)}">${nikkei.rate}</div>
+            <div class="snap-change">일본 (코스피 직접 연동)</div>
+        </div>
+        <div class="snap-card ${getSnapClass(hangseng.rate)}">
+            <div class="snap-label">항셍</div>
+            <div class="snap-value ${getSnapClass(hangseng.rate)}">${hangseng.rate}</div>
+            <div class="snap-change">홍콩·중국 기술주</div>
+        </div>
+        <div class="snap-card ${getSnapClass(shanghai.rate)}">
+            <div class="snap-label">상하이 종합</div>
+            <div class="snap-value ${getSnapClass(shanghai.rate)}">${shanghai.rate}</div>
+            <div class="snap-change">중국 내수</div>
         </div>
     </div>
 
     <div class="section-title">📊 MARKET CHECKLIST</div>
     <div class="check-group">
         <div class="check-item">
-            <div class="check-desc"><strong>나스닥 지수</strong> — 미국 본장 기술주 등락 상태</div>
-            <span class="check-tag ${tags.nasdaq}">상태 확인</span>
+            <div class="check-desc"><strong>SOX 반도체 지수</strong> — 코스피 반도체 섹터와 가장 높은 상관관계 (가중치 ×2)</div>
+            <span class="check-tag ${tags.sox}">${sox.rate}</span>
         </div>
         <div class="check-item">
-            <div class="check-desc"><strong>원/달러 환율</strong> — 외국인 수급의 핵심 지표 (기준: 1450원)</div>
-            <span class="check-tag ${tags.exchange}">환율 주의</span>
+            <div class="check-desc"><strong>나스닥 종합</strong> — 미국 기술주 전반 등락</div>
+            <span class="check-tag ${tags.nasdaq}">${nasdaq.rate}</span>
         </div>
         <div class="check-item">
-            <div class="check-desc"><strong>WTI 유가</strong> — 인플레이션 및 비용 부담 지표</div>
-            <span class="check-tag ${tags.wti}">유가 모니터링</span>
+            <div class="check-desc"><strong>S&amp;P 500</strong> — 미국 전체 시장 바로미터</div>
+            <span class="check-tag ${tags.spx}">${spx.rate}</span>
         </div>
         <div class="check-item">
-            <div class="check-desc"><strong>NQ 야간선물</strong> — 한국 시장 개장 직전 미 선물 흐름</div>
-            <span class="check-tag ${getSnapClass(nqFutures.rate) === 'up' ? 'tag-green' : 'tag-red'}">${nqFutures.rate}</span>
+            <div class="check-desc"><strong>NQ100 야간선물</strong> — 한국 장 개장 전 선물 흐름</div>
+            <span class="check-tag ${getSnapClass(nqFutures.rate) === 'up' ? 'tag-green' : getSnapClass(nqFutures.rate) === 'down' ? 'tag-red' : 'tag-yellow'}">${nqFutures.rate}</span>
         </div>
         <div class="check-item">
-            <div class="check-desc"><strong>CNN 공포탐욕지수</strong> — 시장 심리 (25 이하: Fear, 15 이하: Extreme Fear)</div>
+            <div class="check-desc"><strong>환율 전일 대비</strong> — 급등 시 외국인 수급 이탈 신호 (현재: ${exchangeRate}원)</div>
+            <span class="check-tag ${tags.exchangeChange}">${exchangeChange ? `${parseFloat(exchangeChange) > 0 ? '+' : ''}${exchangeChange}원` : '변동없음'}</span>
+        </div>
+        <div class="check-item">
+            <div class="check-desc"><strong>CNN 공포탐욕지수</strong> — 시장 심리 (25↓: Fear, 15↓: Extreme Fear)</div>
             <span class="check-tag ${tags.cnn}">${cnnFearGreed ? `${cnnFearGreed.score} / 100` : 'N/A'}</span>
+        </div>
+        <div class="check-item">
+            <div class="check-desc"><strong>닛케이 225</strong> — 한국과 섹터 구성 가장 유사, 직접 연동 (-1.5%: Bear +1, -2.5%: +1)</div>
+            <span class="check-tag ${tags.nikkei}">${nikkei.rate}</span>
+        </div>
+        <div class="check-item">
+            <div class="check-desc"><strong>Euro Stoxx 50</strong> — 글로벌 리스크오프 선행 지표 (-1.5%: Bear +1, -2.5%: +1)</div>
+            <span class="check-tag ${tags.eurostoxx}">${eurostoxx.rate}</span>
+        </div>
+        <div class="check-item">
+            <div class="check-desc"><strong>DAX / FTSE100</strong> — 유럽 제조·금융 (참고용)</div>
+            <span class="check-tag ${tags.dax}">DAX ${dax.rate}</span>
+            <span class="check-tag ${tags.ftse}" style="margin-left:4px">FTSE ${ftse.rate}</span>
+        </div>
+        <div class="check-item">
+            <div class="check-desc"><strong>항셍 / 상하이</strong> — 중국 소비·기술주 수급 (참고용)</div>
+            <span class="check-tag ${tags.hangseng}">항셍 ${hangseng.rate}</span>
+            <span class="check-tag ${tags.shanghai}" style="margin-left:4px">상하이 ${shanghai.rate}</span>
+        </div>
+        <div class="check-item">
+            <div class="check-desc"><strong>전날 KOSPI</strong> — 한국 자체 모멘텀 (전일 종가 기준, -1.5% 이하 시 Bear +1)</div>
+            <span class="check-tag ${tags.kospi}">${kospi.rate}</span>
+        </div>
+        <div class="check-item">
+            <div class="check-desc"><strong>전날 KOSDAQ</strong> — 성장주 모멘텀 (전일 종가 기준, -2.0% 이하 시 Bear +1)</div>
+            <span class="check-tag ${tags.kosdaq}">${kosdaq.rate}</span>
+        </div>
+        <div class="check-item">
+            <div class="check-desc"><strong>외국인 순매수</strong> — 코스피 외국인 수급 (억원, 장중 데이터는 10·14시 갱신)</div>
+            <span class="check-tag ${tags.foreign}">${foreignStr}</span>
+        </div>
+        <div class="check-item">
+            <div class="check-desc"><strong>WTI 유가</strong> — 구조적 인플레이션 지표 (참고용)</div>
+            <span class="check-tag ${tags.wti}">$${wti}</span>
         </div>
     </div>
 
@@ -250,7 +339,7 @@ export function buildHtml(marketData, analysis) {
         </div>
         <div class="tip-card">
             <span>💡</span>
-            <div><strong>${mode} 모드 대응 전략:</strong> Bear Score ${bearScore}/9를 기록 중입니다. 현재 지배적인 시장 심리에 맞춘 ${mode} 포트폴리오 비중을 준수하며, 개별 종목의 펀더멘털보다는 거시 지표의 흐름을 최우선으로 고려하세요.</div>
+            <div><strong>${mode} 모드 대응 전략:</strong> Bear Score ${bearScore}/${bearScoreMax}를 기록 중입니다. 현재 지배적인 시장 심리에 맞춘 ${mode} 포트폴리오 비중을 준수하며, 개별 종목의 펀더멘털보다는 거시 지표의 흐름을 최우선으로 고려하세요.</div>
         </div>
     </div>
 

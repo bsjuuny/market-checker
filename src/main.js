@@ -11,46 +11,42 @@ import { analyzeMarketData } from './logic.js';
 import { buildHtml } from './builder.js';
 import { sendTelegramMessage } from './notifier.js';
 
+const isSilent = process.argv.includes('--silent');
+
 async function main() {
   console.log('🚀 Starting Market Checker Pipeline...');
 
   try {
     // 1. 데이터 수집
-    console.log('📊 Fetching market data from Naver Finance...');
+    console.log('📊 Fetching market data...');
     const marketData = await fetchAllMarketData();
-    console.log('✅ Data fetched successfully.');
+    console.log(`✅ Data fetched — NAS ${marketData.nasdaq.rate} | SOX ${marketData.sox.rate} | SPX ${marketData.spx.rate} | EU ${marketData.eurostoxx.rate} | NK ${marketData.nikkei.rate}`);
 
     // 2. 데이터 분석
     console.log('🧠 Analyzing market conditions...');
     const analysis = analyzeMarketData(marketData);
-    console.log(`✅ Analysis complete. Mode: ${analysis.mode}, Bear Score: ${analysis.bearScore}`);
+    console.log(`✅ Analysis — Mode: ${analysis.mode}, BearScore: ${analysis.bearScore}/${analysis.bearScoreMax} (NAS:${analysis.scores.nasdaq}% SOX:${analysis.scores.sox}% EU:${analysis.scores.eurostoxx}% NK:${analysis.scores.nikkei}%)`);
 
     // 3. HTML 생성
     console.log('🏗️ Building HTML dashboard...');
     const html = buildHtml(marketData, analysis);
 
-    // 4. 파일 저장 (docs/index.html)
     const docsDir = path.resolve('docs');
-    if (!fs.existsSync(docsDir)) {
-      fs.mkdirSync(docsDir, { recursive: true });
-    }
+    if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir, { recursive: true });
+    fs.writeFileSync(path.join(docsDir, 'index.html'), html, 'utf8');
+    console.log('✨ Generated docs/index.html');
 
-    const outputPath = path.join(docsDir, 'index.html');
-    fs.writeFileSync(outputPath, html, 'utf8');
-    console.log(`✨ Successfully generated: ${outputPath}`);
-
-    // 5. mode.json 저장 (kis-trader가 읽는 파일)
+    // 4. mode.json 저장 (kis-trader가 읽는 파일)
     const today = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })
       .replace(/\. /g, '-').replace(/\.$/, '').split('-')
       .map((v, i) => i === 0 ? v : v.padStart(2, '0')).join('-');
-    const nqRate = parseFloat((marketData.nqFutures?.rate || '0').replace(/[%+]/g, ''));
-    const nasRate = parseFloat((marketData.nasdaq?.rate || '0').replace(/[%+]/g, ''));
-    const kospiRate = parseFloat((marketData.kospi?.rate || '0').replace(/[%+]/g, ''));
+
+    const nqRate     = analysis.scores.nq;
+    const nasRate    = analysis.scores.nasdaq;
+    const kospiRate  = parseFloat((marketData.kospi?.rate  || '0').replace(/[%+]/g, ''));
     const kosdaqRate = parseFloat((marketData.kosdaq?.rate || '0').replace(/[%+]/g, ''));
-    
-    // kis-trader 전용 모드: 나스닥/NQ 등락률만으로 단순 판단 (market-checker 복합 지표와 분리)
-    // kis-trader market_mode.py 기준: nq >= +0.5% AND nasdaq >= +0.5% → Bull
-    //                                 nq <= -0.5% OR  nasdaq <= -1.0% → Bear
+
+    // kis-trader 모드: NQ + 나스닥 기준 (기존 로직 유지)
     let kisMode = 'Base';
     if (nqRate >= 0.5 && nasRate >= 0.5) kisMode = 'Bull';
     else if (nqRate <= -0.5 || nasRate <= -1.0) kisMode = 'Bear';
@@ -58,27 +54,44 @@ async function main() {
     const modeJson = {
       date: today,
       status: 'completed',
-      mode: kisMode,           // kis-trader용 (나스닥/NQ 기준)
-      display_mode: analysis.mode,  // 웹 리포트용 (복합 지표 기준)
+      mode: kisMode,
+      display_mode: analysis.mode,
       bear_score: analysis.bearScore,
+      bear_score_max: analysis.bearScoreMax,
       kospi_change: kospiRate,
       kosdaq_change: kosdaqRate,
       data: {
-        nq_futures: nqRate,
-        nasdaq: nasRate,
-        kospi: kospiRate,
-        kosdaq: kosdaqRate
+        nq_futures:  nqRate,
+        nasdaq:      nasRate,
+        sox:         analysis.scores.sox,
+        spx:         analysis.scores.spx,
+        kospi:       kospiRate,
+        kosdaq:      kosdaqRate,
+        exchange_change: analysis.scores.exchangeChange,
+        cnn_fear_greed:  analysis.scores.cnn,
+        foreign_investor_bn:   marketData.foreignInvestor?.foreign ?? null,
+        foreign_investor_date: marketData.foreignInvestor?.date ?? null,
+        eurostoxx: analysis.scores.eurostoxx,
+        dax:       analysis.scores.dax,
+        ftse:      analysis.scores.ftse,
+        nikkei:    analysis.scores.nikkei,
+        hangseng:  analysis.scores.hangseng,
+        shanghai:  analysis.scores.shanghai,
       },
     };
-    console.log(`✅ kis-trader 모드: ${kisMode} (nq=${nqRate > 0 ? '+' : ''}${nqRate}% nas=${nasRate > 0 ? '+' : ''}${nasRate}%) / 웹 표시: ${analysis.mode} (bearScore=${analysis.bearScore})`);
+
     const kisTraderDataDir = 'C:/github/kis-trader/data';
     if (!fs.existsSync(kisTraderDataDir)) fs.mkdirSync(kisTraderDataDir, { recursive: true });
     fs.writeFileSync(path.join(kisTraderDataDir, 'mode.json'), JSON.stringify(modeJson, null, 2), 'utf8');
-    console.log(`✅ mode.json 저장: ${modeJson.date} mode=${modeJson.mode} nq=${nqRate} nas=${nasRate}`);
+    console.log(`✅ mode.json — ${modeJson.date} kisMode=${kisMode} displayMode=${analysis.mode} bearScore=${analysis.bearScore}/${analysis.bearScoreMax}`);
 
-    // 6. 텔레그램 알림 전송
-    console.log('📤 Sending Telegram notification...');
-    await sendTelegramMessage(marketData, analysis);
+    // 5. 텔레그램 알림 (silent 모드에서는 생략)
+    if (isSilent) {
+      console.log('🔕 Silent mode — Telegram skipped');
+    } else {
+      console.log('📤 Sending Telegram notification...');
+      await sendTelegramMessage(marketData, analysis);
+    }
   } catch (error) {
     console.error('❌ Pipeline failed:', error);
     process.exit(1);
