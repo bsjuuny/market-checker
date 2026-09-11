@@ -11,8 +11,6 @@ import { analyzeMarketData } from './logic.js';
 import { buildHtml } from './builder.js';
 import { sendTelegramMessage } from './notifier.js';
 
-const isSilent = process.argv.includes('--silent');
-
 async function main() {
   console.log('🚀 Starting Market Checker Pipeline...');
 
@@ -85,13 +83,11 @@ async function main() {
     fs.writeFileSync(path.join(kisTraderDataDir, 'mode.json'), JSON.stringify(modeJson, null, 2), 'utf8');
     console.log(`✅ mode.json — ${modeJson.date} kisMode=${kisMode} displayMode=${analysis.mode} bearScore=${analysis.bearScore}/${analysis.bearScoreMax}`);
 
-    // 5. 텔레그램 알림 (silent 모드에서는 생략)
-    if (isSilent) {
-      console.log('🔕 Silent mode — Telegram skipped');
-    } else {
-      console.log('📤 Sending Telegram notification...');
-      await sendTelegramMessage(marketData, analysis);
-    }
+    // 5. 텔레그램 알림 — 원래는 silent 모드(10:00/14:00 장중 재실행)에서 생략했지만,
+    // 장중에도 갱신 알림을 받고 싶다는 요청으로 항상 보내도록 변경 (2026-09-11).
+    // --silent는 이제 git push만 건너뛰는 용도로 남는다(run-market-checker.mjs에서 처리).
+    console.log('📤 Sending Telegram notification...');
+    await sendTelegramMessage(marketData, analysis);
   } catch (error) {
     console.error('❌ Pipeline failed:', error);
     process.exit(1);
