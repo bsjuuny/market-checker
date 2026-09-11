@@ -6,9 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "node src/main.js",
-    "build:deploy": "npm run dev && git add docs/* && git commit -m \"docs: automated market update\" && git push origin main",
-    "push:all": "git add . && git commit -m \"feat: complete dashboard enhancement with robust scraper & UI\" && git push origin main",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:deploy": "npm test && npm run dev && git add docs/index.html && git commit -m \"docs: automated market update\" && git push origin main",
+    "test": "node --test"
   },
   "dependencies": {
     "axios": "^1.13.6",
